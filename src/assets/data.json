@@ -1,0 +1,108 @@
+{
+    "jours": [
+      {
+        "day": 1,
+        "points": [
+          {
+            "name": "Tour Eiffel",
+            "coordinates": [2.2945, 48.8584],
+            "photos": [
+              "https://source.unsplash.com/random/800x600",
+              "https://source.unsplash.com/random/800x601"
+            ],
+            "arrivalTime": "09:00",
+            "departureTime": "11:00",
+            "description": "Un des monuments les plus célèbres au monde. Situé à Paris, la Tour Eiffel est une prouesse architecturale."
+          },
+          {
+            "name": "Musée du Louvre",
+            "coordinates": [2.3364, 48.8606],
+            "photos": [
+              "https://source.unsplash.com/random/800x602"
+            ],
+            "arrivalTime": "11:30",
+            "departureTime": "14:00",
+            "description": "Le musée du Louvre est le plus grand musée d'art au monde. Il abrite la célèbre Joconde."
+          }
+        ],
+        "routes": {
+          "mode": "walking",
+          "path": [
+            [2.2945, 48.8584],
+            [2.3364, 48.8606]
+          ],
+          "distance": "2.5 km",
+          "duration": "30 min"
+        }
+      },
+      {
+        "day": 2,
+        "points": [
+          {
+            "name": "Cathédrale Notre-Dame",
+            "coordinates": [2.3499, 48.8529],
+            "photos": [
+              "https://source.unsplash.com/random/800x603"
+            ],
+            "arrivalTime": "09:00",
+            "departureTime": "10:30",
+            "description": "Cette cathédrale gothique est un chef-d'œuvre d'architecture et un symbole emblématique de Paris."
+          },
+          {
+            "name": "Basilique du Sacré-Cœur",
+            "coordinates": [2.3431, 48.8867],
+            "photos": [
+              "https://source.unsplash.com/random/800x604"
+            ],
+            "arrivalTime": "11:00",
+            "departureTime": "12:30",
+            "description": "Située au sommet de la butte Montmartre, cette basilique offre une vue panoramique spectaculaire de Paris."
+          }
+        ],
+        "routes": {
+          "mode": "walking",
+          "path": [
+            [2.3499, 48.8529],
+            [2.3431, 48.8867]
+          ],
+          "distance": "3 km",
+          "duration": "45 min"
+        }
+      },
+      {
+        "day": 3,
+        "points": [
+          {
+            "name": "Arc de Triomphe",
+            "coordinates": [2.295, 48.8738],
+            "photos": [
+              "https://source.unsplash.com/random/800x605"
+            ],
+            "arrivalTime": "09:30",
+            "departureTime": "11:00",
+            "description": "Un monument emblématique de l'histoire française, situé au centre de la Place de l'Étoile."
+          },
+          {
+            "name": "Champs-Élysées",
+            "coordinates": [2.3078, 48.8698],
+            "photos": [
+              "https://source.unsplash.com/random/800x606"
+            ],
+            "arrivalTime": "11:15",
+            "departureTime": "12:30",
+            "description": "L'une des avenues les plus célèbres au monde, idéale pour le shopping et les promenades nocturnes."
+          }
+        ],
+        "routes": {
+          "mode": "walking",
+          "path": [
+            [2.295, 48.8738],
+            [2.3078, 48.8698]
+          ],
+          "distance": "1.5 km",
+          "duration": "20 min"
+        }
+      }
+    ]
+  }
+  
