@@ -82,7 +82,7 @@ import MapV from './components/MapV.vue';
 
 .menu-header {
   margin-bottom: 10px;
-  background-color: #007bff;
+  background-color: #3411b4;
   color: white;
   padding: 15px;
   border-radius: 5px;
@@ -107,7 +107,7 @@ import MapV from './components/MapV.vue';
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link.active {
-  background-color: #c8cbce;
+  background-color: #7C32F0;
   color: #fff;
   border-radius: 5px;
   padding: 10px;
@@ -128,7 +128,7 @@ import MapV from './components/MapV.vue';
 }
 
 .map-header {
-  background-color: #007bff;
+  background-color: #3411b4;
   color: #fff;
   padding: 15px;
   border-radius: 5px;
@@ -150,7 +150,7 @@ import MapV from './components/MapV.vue';
 }
 
 .card-footer {
-  background-color: #007bff;
+  background-color: #3411b4;
   color: white;
   padding: 10px;
   border-radius: 5px;

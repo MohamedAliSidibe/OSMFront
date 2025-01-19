@@ -1,20 +1,3 @@
-<template>
-  <div>
-    <!-- Boutons pour naviguer entre les jours -->
-    <div class="navigation-buttons">
-      <button @click="previousDay" :disabled="currentDay === 1">Jour précédent</button>
-      <span>Jour {{ currentDay }}</span>
-      <button @click="nextDay" :disabled="currentDay === jsonData.jours.length">Jour suivant</button>
-      <button @click="showAllRoutes" class="show-all">Afficher tous les itinéraires</button>
-    </div>
-
-    <!-- Conteneur de la carte -->
-    <div ref="mapContainer" class="map-container">
-      <div v-if="loading" class="loading-overlay">Chargement de la carte...</div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import maplibregl from "maplibre-gl";
@@ -26,11 +9,16 @@ const loading = ref(true);
 const currentDay = ref(1); // Jour actuel
 
 let map: maplibregl.Map | null = null;
+let currentMarkers: maplibregl.Marker[] = []; 
+
+// Ajoutez votre access token pour la Jawg API
+const accessToken = "HfPSuO6CUKmBAHY0lfk4PVSaUHY9V7uex6zYgTjX1QKqK6zSnk0bEi9elG0Wo85N";
 
 // Fonction pour aller au jour suivant
 const nextDay = () => {
   if (currentDay.value < jsonData.jours.length) {
     currentDay.value++;
+    loadDayRouteAndMarkers();
   }
 };
 
@@ -38,79 +26,119 @@ const nextDay = () => {
 const previousDay = () => {
   if (currentDay.value > 1) {
     currentDay.value--;
+    loadDayRouteAndMarkers();
   }
 };
 
-// Fonction pour afficher tous les itinéraires
-const showAllRoutes = () => {
+// Fonction pour charger les itinéraires et marqueurs du jour actuel
+const loadDayRouteAndMarkers = async () => {
   if (!map) return;
 
-  // Nettoyage des couches existantes
-  jsonData.jours.forEach((jour) => {
-    if (map?.getLayer(`route-${jour.day}`)) {
-      map.removeLayer(`route-${jour.day}`);
-    }
-    if (map?.getSource(`route-${jour.day}`)) {
-      map.removeSource(`route-${jour.day}`);
-    }
+  const dayData = jsonData.jours.find((jour) => jour.day === currentDay.value);
+  if (!dayData) return;
+
+  // Nettoyer les couches existantes
+  if (map.getLayer("route-line")) {
+    map.removeLayer("route-line");
+  }
+  if (map.getLayer("route-case")) {
+    map.removeLayer("route-case");
+  }
+  if (map.getLayer("route-start")) {
+    map.removeLayer("route-start");
+  }
+  if (map.getSource("route")) {
+    map.removeSource("route");
+  }
+
+  // Supprimer les anciens marqueurs
+  currentMarkers.forEach((marker) => marker.remove());
+  currentMarkers = [];
+
+  // Ajouter les marqueurs
+  dayData.points.forEach((point: any) => {
+    const popupContent = `
+      <h3>${point.name}</h3>
+      <img src="${point.photos[0]}" alt="${point.name}" style="width:100%; border-radius:8px;" />
+      <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
+      <p><strong>Description :</strong> ${point.description}</p>
+    `;
+    const marker = new maplibregl.Marker({ color: "teal" })
+      .setLngLat(point.coordinates)
+      .setPopup(new maplibregl.Popup().setHTML(popupContent))
+      .addTo(map!);
+
+    currentMarkers.push(marker); // Ajouter le marqueur à la liste
   });
 
-  // Ajouter les marqueurs et tracés de tous les jours
-  jsonData.jours.forEach((jour) => {
-    // Ajouter les markers
-    jour.points.forEach((point: any) => {
-      if (
-        Array.isArray(point.coordinates) &&
-        point.coordinates.length === 2 &&
-        typeof point.coordinates[0] === "number" &&
-        typeof point.coordinates[1] === "number"
-      ) {
-        new maplibregl.Marker()
-          .setLngLat(point.coordinates)
-          .setPopup(
-            new maplibregl.Popup().setHTML(`
-              <h3>${point.name}</h3>
-              <img src="${point.photos[0]}" alt="${point.name}" style="width:100%; border-radius:8px;" />
-              <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
-              <p><strong>Description :</strong> ${point.description}</p>
-            `)
-          )
-          .addTo(map!);
-      }
-    });
+  // Requête pour l'itinéraire
+  const coordinates = dayData.points.map((point: any) => point.coordinates).join(";");
+  const response = await fetch(
+    `https://api.jawg.io/routing/route/v1/car/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
+  ).then((res) => res.json());
 
-    // Ajouter les tracés
-    map?.addSource(`route-${jour.day}`, {
+  const route = response.routes[0];
+
+  // Ajout des styles pour la route
+  map.addSource("route", {
+    type: "geojson",
+    data: route.geometry,
+  });
+
+  map.addLayer({
+    id: "route-line",
+    type: "line",
+    source: "route",
+    layout: {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    paint: {
+      "line-color": "#71108a",
+      "line-width": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 3, 18, 8],
+    },
+  });
+
+  map.addLayer({
+    id: "route-case",
+    type: "line",
+    source: "route",
+    layout: {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    paint: {
+      "line-width": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 2, 18, 3],
+      "line-color": "#71108a",
+      "line-gap-width": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 3, 18, 8],
+    },
+  });
+
+  map.addLayer({
+    id: "route-start",
+    type: "circle",
+    source: {
       type: "geojson",
       data: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "LineString",
-              coordinates: jour.routes.path,
-            },
-            properties: {},
-          },
+        type: "MultiPoint",
+        coordinates: [
+          route.geometry.coordinates[0],
+          route.geometry.coordinates[route.geometry.coordinates.length - 1],
         ],
       },
-    });
-
-    map?.addLayer({
-      id: `route-${jour.day}`,
-      type: "line",
-      source: `route-${jour.day}`,
-      layout: {
-        "line-join": "round",
-        "line-cap": "round",
-      },
-      paint: {
-        "line-color": "#00ff00", // Couleur verte pour les itinéraires combinés
-        "line-width": 3,
-      },
-    });
+    },
+    paint: {
+      "circle-radius": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 6, 18, 15],
+      "circle-color": "#13BBFA",
+      "circle-stroke-width": 3,
+      "circle-stroke-color": "#4D93E3",
+    },
   });
+
+  // Ajuster la vue
+  const bounds = new maplibregl.LngLatBounds();
+  route.geometry.coordinates.forEach((coord: any) => bounds.extend(coord));
+  map.fitBounds(bounds, { padding: 50, animate: true });
 };
 
 onMounted(() => {
@@ -118,84 +146,39 @@ onMounted(() => {
     map = new maplibregl.Map({
       container: mapContainer.value,
       style:
-        "https://api.jawg.io/styles/jawg-streets.json?access-token=HfPSuO6CUKmBAHY0lfk4PVSaUHY9V7uex6zYgTjX1QKqK6zSnk0bEi9elG0Wo85N",
+        "https://api.jawg.io/styles/jawg-streets.json?access-token=" +
+        accessToken,
       center: [2.3522, 48.8566], // Coordonnées de Paris
       zoom: 12,
       maxZoom: 20,
       minZoom: 5,
     });
 
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+
     map.on("load", () => {
       loading.value = false;
-
-      // Observer le jour actuel et mettre à jour la carte
-      watch(
-        currentDay,
-        (newDay) => {
-          const dayData = jsonData.jours.find((jour) => jour.day === newDay);
-          if (!dayData) return;
-
-          // Supprimer les anciennes couches et sources
-          if (map?.getLayer("route")) {
-            map.removeLayer("route");
-          }
-          if (map?.getSource("route")) {
-            map.removeSource("route");
-          }
-
-          // Ajouter les markers
-          dayData.points.forEach((point: any) => {
-            new maplibregl.Marker()
-              .setLngLat(point.coordinates)
-              .setPopup(
-                new maplibregl.Popup().setHTML(`
-                  <h3>${point.name}</h3>
-                  <img src="${point.photos[0]}" alt="${point.name}" style="width:100%; border-radius:8px;" />
-                  <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
-                  <p><strong>Description :</strong> ${point.description}</p>
-                `)
-              )
-              .addTo(map!);
-          });
-
-          // Ajouter le tracé
-          map?.addSource("route", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: [
-                {
-                  type: "Feature",
-                  geometry: {
-                    type: "LineString",
-                    coordinates: dayData.routes.path,
-                  },
-                  properties: {},
-                },
-              ],
-            },
-          });
-
-          map?.addLayer({
-            id: "route",
-            type: "line",
-            source: "route",
-            layout: {
-              "line-join": "round",
-              "line-cap": "round",
-            },
-            paint: {
-              "line-color": "#ff0000", // Couleur rouge pour l'itinéraire du jour
-              "line-width": 4,
-            },
-          });
-        },
-        { immediate: true }
-      );
+      loadDayRouteAndMarkers(); // Charger le jour initial
     });
   }
 });
 </script>
+
+<template>
+  <div>
+    <!-- Boutons pour naviguer entre les jours -->
+    <div class="navigation-buttons">
+      <button @click="previousDay" :disabled="currentDay === 1">Jour précédent</button>
+      <span>Jour {{ currentDay }}</span>
+      <button @click="nextDay" :disabled="currentDay === jsonData.jours.length">Jour suivant</button>
+    </div>
+
+    <!-- Conteneur de la carte -->
+    <div ref="mapContainer" class="map-container">
+      <div v-if="loading" class="loading-overlay">Chargement de la carte...</div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .navigation-buttons {
@@ -208,7 +191,7 @@ onMounted(() => {
 .navigation-buttons button {
   margin: 0 10px;
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #71108a;
   color: white;
   border: none;
   border-radius: 5px;
@@ -224,11 +207,6 @@ onMounted(() => {
 .navigation-buttons span {
   font-size: 16px;
   font-weight: bold;
-}
-
-.navigation-buttons .show-all {
-  margin-left: 10px;
-  background-color: #28a745;
 }
 
 .map-container {
