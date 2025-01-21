@@ -6,10 +6,7 @@
         {
           "name": "Tour Eiffel",
           "coordinates": [2.2945, 48.8584],
-          "photos": [
-            "https://source.unsplash.com/random/800x600",
-            "https://source.unsplash.com/random/800x601"
-          ],
+          "photoQuery": "tour eiffel",
           "arrivalTime": "09:00",
           "departureTime": "10:30",
           "description": "Un des monuments les plus célèbres au monde. Situé à Paris, la Tour Eiffel est une prouesse architecturale."
@@ -17,9 +14,7 @@
         {
           "name": "Musée du Louvre",
           "coordinates": [2.3364, 48.8606],
-          "photos": [
-            "https://source.unsplash.com/random/800x602"
-          ],
+          "photoQuery": "louvre museum",
           "arrivalTime": "11:00",
           "departureTime": "12:30",
           "description": "Le musée du Louvre est le plus grand musée d'art au monde. Il abrite la célèbre Joconde."
@@ -27,9 +22,7 @@
         {
           "name": "Pont Alexandre III",
           "coordinates": [2.3131, 48.8656],
-          "photos": [
-            "https://source.unsplash.com/random/800x603"
-          ],
+          "photoQuery": "pont alexandre iii",
           "arrivalTime": "13:00",
           "departureTime": "14:30",
           "description": "Un pont élégant et orné reliant les Invalides et le Grand Palais."
@@ -37,9 +30,7 @@
         {
           "name": "Place de la Concorde",
           "coordinates": [2.321, 48.8655],
-          "photos": [
-            "https://source.unsplash.com/random/800x604"
-          ],
+          "photoQuery": "place de la concorde",
           "arrivalTime": "15:00",
           "departureTime": "16:00",
           "description": "Une des plus grandes places de Paris, riche en histoire."
@@ -47,9 +38,7 @@
         {
           "name": "Jardin des Tuileries",
           "coordinates": [2.3266, 48.8636],
-          "photos": [
-            "https://source.unsplash.com/random/800x605"
-          ],
+          "photoQuery": "jardin des tuileries",
           "arrivalTime": "16:30",
           "departureTime": "17:30",
           "description": "Un jardin classique entre le Louvre et la Place de la Concorde."
@@ -57,9 +46,7 @@
         {
           "name": "Opéra Garnier",
           "coordinates": [2.3318, 48.8706],
-          "photos": [
-            "https://source.unsplash.com/random/800x606"
-          ],
+          "photoQuery": "opera garnier",
           "arrivalTime": "18:00",
           "departureTime": "19:00",
           "description": "Un magnifique opéra au cœur de Paris avec une architecture grandiose."
@@ -67,9 +54,7 @@
         {
           "name": "Les Invalides",
           "coordinates": [2.3124, 48.8566],
-          "photos": [
-            "https://source.unsplash.com/random/800x607"
-          ],
+          "photoQuery": "les invalides",
           "arrivalTime": "19:30",
           "departureTime": "20:30",
           "description": "Un complexe historique avec le tombeau de Napoléon et des musées militaires."
@@ -96,9 +81,7 @@
         {
           "name": "Cathédrale Notre-Dame",
           "coordinates": [2.3499, 48.8529],
-          "photos": [
-            "https://source.unsplash.com/random/800x608"
-          ],
+          "photoQuery": "notre dame cathedral",
           "arrivalTime": "09:00",
           "departureTime": "10:30",
           "description": "Cette cathédrale gothique est un chef-d'œuvre d'architecture et un symbole emblématique de Paris."
@@ -106,9 +89,7 @@
         {
           "name": "Basilique du Sacré-Cœur",
           "coordinates": [2.3431, 48.8867],
-          "photos": [
-            "https://source.unsplash.com/random/800x609"
-          ],
+          "photoQuery": "sacre coeur",
           "arrivalTime": "11:00",
           "departureTime": "12:30",
           "description": "Située au sommet de la butte Montmartre, cette basilique offre une vue panoramique spectaculaire de Paris."
@@ -116,9 +97,7 @@
         {
           "name": "Parc des Buttes-Chaumont",
           "coordinates": [2.3824, 48.8809],
-          "photos": [
-            "https://source.unsplash.com/random/800x610"
-          ],
+          "photoQuery": "buttes chaumont",
           "arrivalTime": "13:00",
           "departureTime": "14:30",
           "description": "Un parc pittoresque avec des collines, des grottes et des cascades."
@@ -126,9 +105,7 @@
         {
           "name": "Musée Picasso",
           "coordinates": [2.3626, 48.8593],
-          "photos": [
-            "https://source.unsplash.com/random/800x611"
-          ],
+          "photoQuery": "picasso museum",
           "arrivalTime": "15:00",
           "departureTime": "16:30",
           "description": "Un musée dédié à l'œuvre de Pablo Picasso."
@@ -136,9 +113,7 @@
         {
           "name": "Place des Vosges",
           "coordinates": [2.3669, 48.8555],
-          "photos": [
-            "https://source.unsplash.com/random/800x612"
-          ],
+          "photoQuery": "place des vosges",
           "arrivalTime": "17:00",
           "departureTime": "18:00",
           "description": "Un charmant square historique dans le quartier du Marais."
@@ -146,9 +121,7 @@
         {
           "name": "Centre Pompidou",
           "coordinates": [2.3522, 48.8606],
-          "photos": [
-            "https://source.unsplash.com/random/800x613"
-          ],
+          "photoQuery": "pompidou center",
           "arrivalTime": "18:30",
           "departureTime": "19:30",
           "description": "Un centre culturel célèbre pour son architecture audacieuse et ses expositions d'art contemporain."
@@ -156,9 +129,7 @@
         {
           "name": "Jardin du Luxembourg",
           "coordinates": [2.3372, 48.8462],
-          "photos": [
-            "https://source.unsplash.com/random/800x614"
-          ],
+          "photoQuery": "jardin du luxembourg",
           "arrivalTime": "20:00",
           "departureTime": "21:00",
           "description": "Un magnifique jardin au cœur de Paris, idéal pour une promenade ou un moment de détente."
@@ -185,9 +156,7 @@
         {
           "name": "Panthéon",
           "coordinates": [2.346, 48.8462],
-          "photos": [
-            "https://source.unsplash.com/random/800x615"
-          ],
+          "photoQuery": "pantheon paris",
           "arrivalTime": "09:00",
           "departureTime": "10:30",
           "description": "Un mausolée monumental abritant les tombes des grandes figures de l'histoire française."
@@ -195,9 +164,7 @@
         {
           "name": "Parc Monceau",
           "coordinates": [2.308, 48.879],
-          "photos": [
-            "https://source.unsplash.com/random/800x616"
-          ],
+          "photoQuery": "parc monceau",
           "arrivalTime": "11:00",
           "departureTime": "12:30",
           "description": "Un charmant parc avec une ambiance romantique et des structures historiques."
@@ -205,9 +172,7 @@
         {
           "name": "Musée d'Orsay",
           "coordinates": [2.325, 48.8599],
-          "photos": [
-            "https://source.unsplash.com/random/800x617"
-          ],
+          "photoQuery": "orsay museum",
           "arrivalTime": "13:00",
           "departureTime": "14:30",
           "description": "Un musée renommé pour ses collections d'art impressionniste et post-impressionniste."
@@ -215,9 +180,6 @@
         {
           "name": "Les Invalides",
           "coordinates": [2.3124, 48.8566],
-          "photos": [
-            "https://source.unsplash.com/random/800x618"
-          ],
           "arrivalTime": "15:00",
           "departureTime": "16:30",
           "description": "Un complexe historique avec le tombeau de Napoléon et des musées militaires."
@@ -225,9 +187,7 @@
         {
           "name": "Grand Palais",
           "coordinates": [2.3125, 48.8662],
-          "photos": [
-            "https://source.unsplash.com/random/800x619"
-          ],
+          "photoQuery": "grand palais",
           "arrivalTime": "17:00",
           "departureTime": "18:30",
           "description": "Un site emblématique pour les expositions d'art et les événements culturels."
@@ -235,9 +195,7 @@
         {
           "name": "Petit Palais",
           "coordinates": [2.3132, 48.8663],
-          "photos": [
-            "https://source.unsplash.com/random/800x620"
-          ],
+          "photoQuery": "petit palais",
           "arrivalTime": "19:00",
           "departureTime": "20:00",
           "description": "Un musée d'art offrant une collection fascinante et une magnifique architecture."
@@ -245,9 +203,7 @@
         {
           "name": "Place Vendôme",
           "coordinates": [2.3283, 48.867],
-          "photos": [
-            "https://source.unsplash.com/random/800x621"
-          ],
+          "photoQuery": "place vendome",
           "arrivalTime": "20:30",
           "departureTime": "21:30",
           "description": "Une place célèbre pour ses boutiques de luxe et son architecture imposante."

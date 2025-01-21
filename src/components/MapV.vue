@@ -30,6 +30,22 @@ const previousDay = () => {
   }
 };
 
+// Fonction pour récupérer une image depuis l'API Unsplash en fonction de `photoQuery`
+const getUnsplashImage = async (query: string): Promise<string> => {
+  const unsplashAccessKey = "rYh6qhedSiJ0-t0rmVGyq1zoU-5bbTFkIcNSTHVS4CQ"; // Remplacez par votre clé Unsplash
+  const response = await fetch(
+    `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&client_id=${unsplashAccessKey}`
+  );
+  const data = await response.json();
+  if (data.results && data.results.length > 0) {
+    //console.log(data.results[0].urls.raw);
+    
+    return data.results[0].urls.small; 
+  }
+  return ""; // Si aucune image n'est trouvée, retournez une chaîne vide
+};
+
+
 // Fonction pour charger les itinéraires et marqueurs du jour actuel
 const loadDayRouteAndMarkers = async () => {
   if (!map) return;
@@ -57,19 +73,22 @@ const loadDayRouteAndMarkers = async () => {
 
   // Ajouter les marqueurs
   dayData.points.forEach((point: any) => {
-    const popupContent = `
-      <h3>${point.name}</h3>
-      <img src="${point.photos[0]}" alt="${point.name}" style="width:100%; border-radius:8px;" />
-      <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
-      <p><strong>Description :</strong> ${point.description}</p>
-    `;
-    const marker = new maplibregl.Marker({ color: "teal" })
-      .setLngLat(point.coordinates)
-      .setPopup(new maplibregl.Popup().setHTML(popupContent))
-      .addTo(map!);
 
-    currentMarkers.push(marker); // Ajouter le marqueur à la liste
-  });
+    getUnsplashImage(point.photoQuery).then((img) => {
+  const popupContent = `
+    <h3>${point.name}</h3>
+    <img src="${img}" alt="${point.name}" style="width:100%;border-radius:8px;" />
+    <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
+    <p><strong>Description :</strong> ${point.description}</p>
+  `;
+  const marker = new maplibregl.Marker({ color: "teal" })
+    .setLngLat(point.coordinates)
+    .setPopup(new maplibregl.Popup().setHTML(popupContent))
+    .addTo(map!);
+
+  currentMarkers.push(marker); // Ajouter le marqueur à la liste
+});
+});
 
   // Requête pour l'itinéraire
   const coordinates = dayData.points.map((point: any) => point.coordinates).join(";");
