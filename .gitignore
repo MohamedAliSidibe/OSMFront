@@ -30,4 +30,3 @@ coverage
 *.tsbuildinfo
 .vscode/
 public
-env.d.ts
