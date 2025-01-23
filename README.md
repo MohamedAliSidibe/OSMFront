@@ -1,4 +1,5 @@
 [![Node.js CI](https://github.com/MohamedAliSidibe/OSMFront/actions/workflows/node.js.yml/badge.svg)](https://github.com/MohamedAliSidibe/OSMFront/actions/workflows/node.js.yml)
+
 # voyages-et-partages
 
 This template should help get you started developing with Vue 3 in Vite.
