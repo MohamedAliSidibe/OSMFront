@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch,computed } from "vue";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import jsonData from "../assets/data.json";
@@ -7,6 +7,12 @@ import jsonData from "../assets/data.json";
 const mapContainer = ref<HTMLDivElement | null>(null);
 const loading = ref(true);
 const currentDay = ref(1); // Jour actuel
+
+// Ajoutez ici la logique pour le mode
+const mode = computed(() => {
+  const dayData = jsonData.jours.find((jour) => jour.day === currentDay.value);
+  return dayData?.routes?.mode || "walking"; // Par défaut, "walking" si non défini
+});
 
 let map: maplibregl.Map | null = null;
 let currentMarkers: maplibregl.Marker[] = []; 
@@ -50,114 +56,88 @@ const getUnsplashImage = async (query: string): Promise<string> => {
 const loadDayRouteAndMarkers = async () => {
   if (!map) return;
 
-  const dayData = jsonData.jours.find((jour) => jour.day === currentDay.value);
-  if (!dayData) return;
-
-  // Nettoyer les couches existantes
-  if (map.getLayer("route-line")) {
-    map.removeLayer("route-line");
-  }
-  if (map.getLayer("route-case")) {
-    map.removeLayer("route-case");
-  }
-  if (map.getLayer("route-start")) {
-    map.removeLayer("route-start");
-  }
-  if (map.getSource("route")) {
-    map.removeSource("route");
-  }
+  // Nettoyer les couches et les sources
+  if (map.getLayer("route-line")) map.removeLayer("route-line");
+  if (map.getSource("route")) map.removeSource("route");
 
   // Supprimer les anciens marqueurs
   currentMarkers.forEach((marker) => marker.remove());
   currentMarkers = [];
 
+  // Charger les données pour le jour actuel
+  const dayData = jsonData.jours.find((jour) => jour.day === currentDay.value);
+  if (!dayData) {
+    console.error("Aucune donnée pour le jour", currentDay.value);
+    return;
+  }
+
+ 
   // Ajouter les marqueurs
   dayData.points.forEach((point: any) => {
 
-    getUnsplashImage(point.photoQuery).then((img) => {
+  getUnsplashImage(point.photoQuery).then((img) => {
   const popupContent = `
-    <h3>${point.name}</h3>
-    <img src="${img}" alt="${point.name}" style="width:100%;border-radius:8px;" />
-    <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
-    <p><strong>Description :</strong> ${point.description}</p>
+  <h3>${point.name}</h3>
+  <img src="${img}" alt="${point.name}" style="width:100%;border-radius:8px;" />
+  <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
+  <p><strong>Description :</strong> ${point.description}</p>
   `;
   const marker = new maplibregl.Marker({ color: "teal" })
-    .setLngLat(point.coordinates)
-    .setPopup(new maplibregl.Popup().setHTML(popupContent))
-    .addTo(map!);
+  .setLngLat(point.coordinates)
+  .setPopup(new maplibregl.Popup().setHTML(popupContent))
+  .addTo(map!);
 
   currentMarkers.push(marker); // Ajouter le marqueur à la liste
-});
-});
-
-  // Requête pour l'itinéraire
-  const coordinates = dayData.points.map((point: any) => point.coordinates).join(";");
-  const response = await fetch(
-    `https://api.jawg.io/routing/route/v1/car/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
-  ).then((res) => res.json());
-
-  const route = response.routes[0];
-
-  // Ajout des styles pour la route
-  map.addSource("route", {
-    type: "geojson",
-    data: route.geometry,
+  });
   });
 
-  map.addLayer({
-    id: "route-line",
-    type: "line",
-    source: "route",
-    layout: {
-      "line-cap": "round",
-      "line-join": "round",
-    },
-    paint: {
-      "line-color": "#71108a",
-      "line-width": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 3, 18, 8],
-    },
-  });
+  // Charger et tracer l'itinéraire
+  try {
+    const coordinates = dayData.points.map((point) => point.coordinates).join(";");
+    const response = await fetch(
+      `https://api.jawg.io/routing/route/v1/${dayData.routes.mode}/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
+    );
 
-  map.addLayer({
-    id: "route-case",
-    type: "line",
-    source: "route",
-    layout: {
-      "line-cap": "round",
-      "line-join": "round",
-    },
-    paint: {
-      "line-width": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 2, 18, 3],
-      "line-color": "#71108a",
-      "line-gap-width": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 3, 18, 8],
-    },
-  });
+    if (!response.ok) {
+      console.error("Erreur lors du chargement de l'itinéraire", response.status);
+      return;
+    }
 
-  map.addLayer({
-    id: "route-start",
-    type: "circle",
-    source: {
+    const data = await response.json();
+    const route = data.routes[0];
+    if (!route || !route.geometry) {
+      console.error("Aucun itinéraire valide trouvé");
+      return;
+    }
+
+    // Ajouter la source et la couche pour l'itinéraire
+    map.addSource("route", {
       type: "geojson",
-      data: {
-        type: "MultiPoint",
-        coordinates: [
-          route.geometry.coordinates[0],
-          route.geometry.coordinates[route.geometry.coordinates.length - 1],
-        ],
-      },
-    },
-    paint: {
-      "circle-radius": ["interpolate", ["exponential", 1.5], ["zoom"], 5, 6, 18, 15],
-      "circle-color": "#13BBFA",
-      "circle-stroke-width": 3,
-      "circle-stroke-color": "#4D93E3",
-    },
-  });
+      data: route.geometry,
+    });
 
-  // Ajuster la vue
-  const bounds = new maplibregl.LngLatBounds();
-  route.geometry.coordinates.forEach((coord: any) => bounds.extend(coord));
-  map.fitBounds(bounds, { padding: 50, animate: true });
+    map.addLayer({
+      id: "route-line",
+      type: "line",
+      source: "route",
+      layout: {
+        "line-cap": "round",
+        "line-join": "round",
+      },
+      paint: {
+        "line-color": dayData.routes.mode === "walking" ? "#71108a" : "#71108a",
+        "line-width": 6,
+        ...(dayData.routes.mode === "walking" && { "line-dasharray": [2, 2] }), // Ajoute uniquement pour les piétons
+      },
+    });
+
+    // Ajuster la vue pour inclure tout l'itinéraire
+    const bounds = new maplibregl.LngLatBounds();
+    route.geometry.coordinates.forEach((coord:any) => bounds.extend(coord));
+    map.fitBounds(bounds, { padding: 50 });
+  } catch (error) {
+    console.error("Erreur lors du tracé de l'itinéraire :", error);
+  }
 };
 
 onMounted(() => {
@@ -185,6 +165,9 @@ onMounted(() => {
 
 <template>
   <div>
+    <div class="mode-indicator">
+      Mode actuel : <strong>{{ mode === "walking" ? "Piéton" : "Voiture" }}</strong>
+    </div>
     <!-- Boutons pour naviguer entre les jours -->
     <div class="navigation-buttons">
       <button @click="previousDay" :disabled="currentDay === 1">Jour précédent</button>
@@ -251,4 +234,24 @@ onMounted(() => {
   color: #fff;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
 }
+.mode-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+  padding: 10px 15px;
+  background-color: #f8f9fa; 
+  border: 2px solid #71108a; 
+  border-radius: 8px; 
+  font-size: 18px; 
+  font-weight: bold; 
+  color: #333; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mode-indicator strong {
+  color: #71108a; 
+  font-weight: bold; 
+}
+
 </style>

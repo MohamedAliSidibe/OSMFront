@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import { RouterView } from 'vue-router';
+
+</script>
+
 <template>
   <div class="container-fluid">
     <!-- Contenu principal avec barre latérale -->
@@ -12,22 +17,23 @@
         <hr />
         <!-- Navigation -->
         <div class="position-sticky">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link active" href="#">
-                <i class="fas fa-map-marked-alt"></i> Planifier un voyage
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-                <i class="fas fa-search-location"></i> Trouver des destinations
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-                <i class="fas fa-cogs"></i> Paramètres
-              </a>
-            </li>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <router-link to="/" class="nav-link" active-class="active">
+              <font-awesome-icon icon="map-marked-alt" /> Planifier un voyage
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link to="/destinations" class="nav-link" active-class="active">
+              <font-awesome-icon icon="search-location" /> Trouver des destinations
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link to="/parametres" class="nav-link" active-class="active">
+              <font-awesome-icon icon="cogs" /> Paramètres
+            </router-link>
+          </li>
+
           </ul>
         </div>
       </nav>
@@ -39,7 +45,7 @@
           <h5>Carte Interactive</h5>
         </div>
         <div class="map-content">
-          <MapV />
+         <RouterView></RouterView>
         </div>
         <!-- Footer -->
         <footer class="card-footer text-center mt-3">
@@ -49,10 +55,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import MapV from './components/MapV.vue';
-</script>
 
 <style scoped>
 /* Conteneur principal */
