@@ -1,4 +1,4 @@
-[![Node.js CI](https://github.com/MohamedAliSidibe/OSMFront/actions/workflows/node.js.yml/badge.svg)](https://github.com/MohamedAliSidibe/OSMFront/actions/workflows/node.js.yml)
+
 
 # voyages-et-partages
 
