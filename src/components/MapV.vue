@@ -1,28 +1,43 @@
 <script setup lang="ts">
-import { onMounted, ref, watch,computed } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import jsonData from "../assets/data.json";
+import jsonData from "../assets/data.json"; // Charger les données JSON
+
+// Props pour recevoir l'ID du voyage
+const props = defineProps({
+  voyageId: String, // ID du voyage sélectionné
+});
 
 const mapContainer = ref<HTMLDivElement | null>(null);
 const loading = ref(true);
 const currentDay = ref(1); // Jour actuel
-
-// Ajoutez ici la logique pour le mode
-const mode = computed(() => {
-  const dayData = jsonData.jours.find((jour) => jour.day === currentDay.value);
-  return dayData?.routes?.mode || "walking"; // Par défaut, "walking" si non défini
-});
-
 let map: maplibregl.Map | null = null;
-let currentMarkers: maplibregl.Marker[] = []; 
+let currentMarkers: maplibregl.Marker[] = [];
+const dynamicDuration = ref<string>(""); // Durée dynamique récupérée via l'API
+
 
 // Ajoutez votre access token pour la Jawg API
 const accessToken = "HfPSuO6CUKmBAHY0lfk4PVSaUHY9V7uex6zYgTjX1QKqK6zSnk0bEi9elG0Wo85N";
 
+// Trouver le voyage correspondant à l'ID
+const voyage = computed(() =>
+  jsonData.voyages.find((v) => v.id === props.voyageId)
+);
+
+// Récupérer les jours du voyage sélectionné
+const days = computed(() => (voyage.value ? voyage.value.jours : []));
+
+// Ajoutez ici la logique pour le mode
+const mode = computed(() => {
+  const dayData = days.value.find((jour) => jour.day === currentDay.value);
+  return dayData?.routes?.mode || "walking"; // Par défaut, "walking" si non défini
+});
+
+
 // Fonction pour aller au jour suivant
 const nextDay = () => {
-  if (currentDay.value < jsonData.jours.length) {
+  if (currentDay.value < days.value.length) {
     currentDay.value++;
     loadDayRouteAndMarkers();
   }
@@ -38,23 +53,48 @@ const previousDay = () => {
 
 // Fonction pour récupérer une image depuis l'API Unsplash en fonction de `photoQuery`
 const getUnsplashImage = async (query: string): Promise<string> => {
-  const unsplashAccessKey = "rYh6qhedSiJ0-t0rmVGyq1zoU-5bbTFkIcNSTHVS4CQ"; // Remplacez par votre clé Unsplash
+  const unsplashAccessKey = "rYh6qhedSiJ0-t0rmVGyq1zoU-5bbTFkIcNSTHVS4CQ";
   const response = await fetch(
     `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&client_id=${unsplashAccessKey}`
   );
   const data = await response.json();
   if (data.results && data.results.length > 0) {
-    //console.log(data.results[0].urls.raw);
-    
-    return data.results[0].urls.small; 
+    return data.results[0].urls.small;
   }
-  return ""; // Si aucune image n'est trouvée, retournez une chaîne vide
+  return "";
 };
+
+const cachedDurations = ref<Record<string, string>>({}); // Cache pour stocker les durées
+// Fonction pour récupérer la durée totale depuis Jawg API
+const fetchDurationFromJawg = async (coordinates: string) => {
+  try {    
+    const response = await fetch(
+      `https://api.jawg.io/routing/route/v1/${mode.value}/${coordinates}?alternatives=false&geometries=geojson&overview=full&access-token=${accessToken}`
+    );
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      const durationInSeconds = data.routes[0]?.duration; // Durée en secondes      
+      const hours = Math.floor(durationInSeconds / 3600);
+      const minutes = Math.floor((durationInSeconds % 3600) / 60);
+      const durationString = `${hours} h ${minutes} min`;
+      cachedDurations.value[coordinates] = durationString; // Mettre en cache
+      dynamicDuration.value = durationString;
+    } else {
+      console.error("Erreur lors de la récupération de la durée depuis Jawg");
+      dynamicDuration.value = "Indisponible";
+    }
+  } catch (error) {
+    console.error("Erreur lors de la requête à Jawg:", error);
+    dynamicDuration.value = "Indisponible";
+  }
+};
+
 
 
 // Fonction pour charger les itinéraires et marqueurs du jour actuel
 const loadDayRouteAndMarkers = async () => {
-  if (!map) return;
+  if (!map || !voyage.value) return;
 
   // Nettoyer les couches et les sources
   if (map.getLayer("route-line")) map.removeLayer("route-line");
@@ -65,30 +105,28 @@ const loadDayRouteAndMarkers = async () => {
   currentMarkers = [];
 
   // Charger les données pour le jour actuel
-  const dayData = jsonData.jours.find((jour) => jour.day === currentDay.value);
+  const dayData = days.value.find((jour) => jour.day === currentDay.value);
   if (!dayData) {
     console.error("Aucune donnée pour le jour", currentDay.value);
     return;
   }
 
- 
   // Ajouter les marqueurs
   dayData.points.forEach((point: any) => {
+    getUnsplashImage(point.photoQuery).then((img) => {
+      const popupContent = `
+        <h3>${point.name}</h3>
+        <img src="${img}" alt="${point.name}" style="width:100%;border-radius:8px;" />
+        <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
+        <p><strong>Description :</strong> ${point.description}</p>
+      `;
+      const marker = new maplibregl.Marker({ color: "teal" })
+        .setLngLat(point.coordinates)
+        .setPopup(new maplibregl.Popup().setHTML(popupContent))
+        .addTo(map!);
 
-  getUnsplashImage(point.photoQuery).then((img) => {
-  const popupContent = `
-  <h3>${point.name}</h3>
-  <img src="${img}" alt="${point.name}" style="width:100%;border-radius:8px;" />
-  <p><strong>Heures :</strong> ${point.arrivalTime} - ${point.departureTime}</p>
-  <p><strong>Description :</strong> ${point.description}</p>
-  `;
-  const marker = new maplibregl.Marker({ color: "teal" })
-  .setLngLat(point.coordinates)
-  .setPopup(new maplibregl.Popup().setHTML(popupContent))
-  .addTo(map!);
-
-  currentMarkers.push(marker); // Ajouter le marqueur à la liste
-  });
+      currentMarkers.push(marker); // Ajouter le marqueur à la liste
+    });
   });
 
   // Charger et tracer l'itinéraire
@@ -127,19 +165,24 @@ const loadDayRouteAndMarkers = async () => {
       paint: {
         "line-color": dayData.routes.mode === "walking" ? "#71108a" : "#71108a",
         "line-width": 6,
-        ...(dayData.routes.mode === "walking" && { "line-dasharray": [2, 2] }), // Ajoute uniquement pour les piétons
+        ...(dayData.routes.mode === "walking" && { "line-dasharray": [2, 2] }),
       },
     });
 
+      // Récupérer la durée totale depuis Jawg API
+      await fetchDurationFromJawg(coordinates);
+
+
     // Ajuster la vue pour inclure tout l'itinéraire
     const bounds = new maplibregl.LngLatBounds();
-    route.geometry.coordinates.forEach((coord:any) => bounds.extend(coord));
+    route.geometry.coordinates.forEach((coord: any) => bounds.extend(coord));
     map.fitBounds(bounds, { padding: 50 });
   } catch (error) {
     console.error("Erreur lors du tracé de l'itinéraire :", error);
   }
 };
 
+// Charger les données lorsque la carte est montée ou que le voyageId change
 onMounted(() => {
   if (mapContainer.value) {
     map = new maplibregl.Map({
@@ -161,6 +204,13 @@ onMounted(() => {
     });
   }
 });
+
+watch(
+  () => props.voyageId,
+  () => {
+    loadDayRouteAndMarkers(); // Recharger les données si l'ID de voyage change
+  }
+);
 </script>
 
 <template>
@@ -168,11 +218,14 @@ onMounted(() => {
     <div class="mode-indicator">
       Mode actuel : <strong>{{ mode === "walking" ? "Piéton" : "Voiture" }}</strong>
     </div>
+    <div class="duration-indicator">
+      Durée totale du jour : <strong>{{ dynamicDuration }}</strong>
+    </div>
     <!-- Boutons pour naviguer entre les jours -->
     <div class="navigation-buttons">
       <button @click="previousDay" :disabled="currentDay === 1">Jour précédent</button>
       <span>Jour {{ currentDay }}</span>
-      <button @click="nextDay" :disabled="currentDay === jsonData.jours.length">Jour suivant</button>
+      <button @click="nextDay" :disabled="currentDay === days.length">Jour suivant</button>
     </div>
 
     <!-- Conteneur de la carte -->
@@ -254,4 +307,10 @@ onMounted(() => {
   font-weight: bold; 
 }
 
+.duration-indicator {
+  text-align: center;
+  margin: 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
 </style>

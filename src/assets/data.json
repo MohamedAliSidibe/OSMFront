@@ -1,4 +1,8 @@
 {
+"voyages": [
+  {
+  "id":"voyage1",
+  "name": "Paris Classique",
   "jours": [
     {
       "day": 1,
@@ -225,4 +229,186 @@
       }
     }
   ]
+  },
+  {
+    "id": "voyage2",
+    "name": "Montagnes et Vallées",
+    "jours": [
+      {
+        "day": 1,
+        "points": [
+          {
+            "name": "Mont Blanc",
+            "coordinates": [6.8651, 45.8326],
+            "photoQuery": "mont blanc",
+            "arrivalTime": "08:00",
+            "departureTime": "10:00",
+            "description": "Le sommet le plus haut d'Europe, offrant des vues spectaculaires."
+          },
+          {
+            "name": "Lac d'Annecy",
+            "coordinates": [6.1298, 45.8993],
+            "photoQuery": "lac annecy",
+            "arrivalTime": "11:00",
+            "departureTime": "13:00",
+            "description": "Un lac cristallin entouré de montagnes."
+          },
+          {
+            "name": "Gorges du Verdon",
+            "coordinates": [6.3833, 43.7911],
+            "photoQuery": "gorges du verdon",
+            "arrivalTime": "15:00",
+            "departureTime": "18:00",
+            "description": "Les plus grandes gorges d'Europe, parfaites pour des randonnées."
+          }
+        ],
+        "routes": {
+          "mode": "driving",
+          "path": [
+            [6.8651, 45.8326],
+            [6.1298, 45.8993],
+            [6.3833, 43.7911]
+          ],
+          "distance": "150 km",
+          "duration": "3 h"
+        }
+      },
+      {
+        "day": 2,
+        "points": [
+          {
+            "name": "Parc naturel de Chartreuse",
+            "coordinates": [5.8232, 45.3496],
+            "photoQuery": "parc naturel chartreuse",
+            "arrivalTime": "08:30",
+            "departureTime": "11:30",
+            "description": "Un parc naturel offrant une biodiversité unique et des paysages magnifiques."
+          },
+          {
+            "name": "Château de Chambéry",
+            "coordinates": [5.9212, 45.565],
+            "photoQuery": "chateau chambery",
+            "arrivalTime": "13:00",
+            "departureTime": "15:00",
+            "description": "Un château historique datant de la période médiévale."
+          }
+        ],
+        "routes": {
+          "mode": "walking",
+          "path": [
+            [5.8232, 45.3496],
+            [5.9212, 45.565]
+          ],
+          "distance": "100 km",
+          "duration": "2 h"
+        }
+      },
+      {
+        "day": 3,
+        "points": [
+          {
+            "name": "Les Deux Alpes",
+            "coordinates": [6.121, 45.015],
+            "photoQuery": "les deux alpes",
+            "arrivalTime": "09:00",
+            "departureTime": "12:00",
+            "description": "Une station de ski réputée avec des vues à couper le souffle."
+          },
+          {
+            "name": "Grenoble Bastille",
+            "coordinates": [5.7302, 45.198],
+            "photoQuery": "grenoble bastille",
+            "arrivalTime": "14:00",
+            "departureTime": "17:00",
+            "description": "Un fort militaire accessible par téléphérique offrant une vue panoramique."
+          }
+        ],
+        "routes": {
+          "mode": "walking",
+          "path": [
+            [6.121, 45.015],
+            [5.7302, 45.198]
+          ],
+          "distance": "90 km",
+          "duration": "2 h"
+        }
+      }
+    ]
+  },
+  {
+    "id": "voyage3",
+    "name": "Côte Méditerranéenne",
+    "jours": [
+      {
+        "day": 1,
+        "points": [
+          {
+            "name": "Promenade des Anglais",
+            "coordinates": [7.2655, 43.6957],
+            "photoQuery": "promenade des anglais",
+            "arrivalTime": "09:00",
+            "departureTime": "10:30",
+            "description": "Une promenade emblématique longeant la Méditerranée."
+          },
+          {
+            "name": "Vieux Nice",
+            "coordinates": [7.2734, 43.6983],
+            "photoQuery": "vieux nice",
+            "arrivalTime": "11:00",
+            "departureTime": "12:30",
+            "description": "Un quartier historique avec des ruelles charmantes."
+          },
+          {
+            "name": "Monaco",
+            "coordinates": [7.4246, 43.7374],
+            "photoQuery": "monaco",
+            "arrivalTime": "14:00",
+            "departureTime": "17:00",
+            "description": "Un lieu de luxe et de beauté sur la Côte d'Azur."
+          }
+        ],
+        "routes": {
+          "mode": "driving",
+          "path": [
+            [7.2655, 43.6957],
+            [7.2734, 43.6983],
+            [7.4246, 43.7374]
+          ],
+          "distance": "20 km",
+          "duration": "1 h"
+        }
+      },
+      {
+        "day": 2,
+        "points": [
+          {
+            "name": "Antibes",
+            "coordinates": [7.1278, 43.5804],
+            "photoQuery": "antibes",
+            "arrivalTime": "09:00",
+            "departureTime": "12:00",
+            "description": "Une ville charmante avec des plages magnifiques et un centre historique."
+          },
+          {
+            "name": "Saint-Tropez",
+            "coordinates": [6.635, 43.2704],
+            "photoQuery": "saint tropez",
+            "arrivalTime": "14:00",
+            "departureTime": "17:00",
+            "description": "Un village connu pour son port, ses plages et son ambiance festive."
+          }
+        ],
+        "routes": {
+          "mode": "walking",
+          "path": [
+            [7.1278, 43.5804],
+            [6.635, 43.2704]
+          ],
+          "distance": "80 km",
+          "duration": "2 h"
+        }
+      }
+    ]
+  }
+  ] 
 }

@@ -11,6 +11,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: MapV,
+      props: (route) => ({ voyageId: route.query.voyageId }), // Récupère l'ID du voyage depuis les paramètres de requête
     },
     { path: '/destinations', name: 'TrouverDestinations', component: TrouverDestinations},
     { path: '/parametres', name: 'Parametres', component: Parametres},
