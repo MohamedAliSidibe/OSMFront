@@ -16,6 +16,10 @@ let map: maplibregl.Map | null = null;
 let currentMarkers: maplibregl.Marker[] = [];
 const dynamicDuration = ref<string>(""); // Durée dynamique récupérée via l'API
 
+const searchQuery = ref<string>(""); // Texte saisi dans la barre de recherche
+const geocodeResult = ref<any | null>(null); // Résultat de géocodage
+
+
 
 // Ajoutez votre access token pour la Jawg API
 const accessToken = "HfPSuO6CUKmBAHY0lfk4PVSaUHY9V7uex6zYgTjX1QKqK6zSnk0bEi9elG0Wo85N";
@@ -74,12 +78,24 @@ const fetchDurationFromJawg = async (coordinates: string) => {
     if (response.ok) {
       const data = await response.json();
       console.log(data);
+
+      const distanceInMeters = data.routes[0]?.distance; // Distance totale en mètres
+      const distanceInKm = distanceInMeters / 1000; // Convertir en km
+
+      if (distanceInKm > 25) {
+        console.warn(`L'itinéraire dépasse la limite de 25 km (${distanceInKm.toFixed(2)} km)`);
+        alert(`Attention : L'itinéraire dépasse 25 km (${distanceInKm.toFixed(2)} km).`);
+        return; // Stoppe l'affichage de l'itinéraire
+      } 
+      
       const durationInSeconds = data.routes[0]?.duration; // Durée en secondes      
       const hours = Math.floor(durationInSeconds / 3600);
       const minutes = Math.floor((durationInSeconds % 3600) / 60);
       const durationString = `${hours} h ${minutes} min`;
       cachedDurations.value[coordinates] = durationString; // Mettre en cache
       dynamicDuration.value = durationString;
+
+      
     } else {
       console.error("Erreur lors de la récupération de la durée depuis Jawg");
       dynamicDuration.value = "Indisponible";
@@ -90,6 +106,45 @@ const fetchDurationFromJawg = async (coordinates: string) => {
   }
 };
 
+
+
+const suggestions = ref<any[]>([]); // Suggestions de lieux
+
+const searchLocation = async () => {
+  if (!searchQuery.value.trim()) return;
+
+  try {
+    const response = await fetch(
+      `https://api.jawg.io/places/v1/autocomplete?text=${encodeURIComponent(
+        searchQuery.value
+      )}&access-token=${accessToken}`
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      suggestions.value = data.features.map((feature: any) => ({
+        name: feature.properties.label,
+        coordinates: feature.geometry.coordinates,
+      }));
+    } else {
+      console.error("Erreur lors de la recherche de l'emplacement.");
+      suggestions.value = [];
+    }
+  } catch (error) {
+    console.error("Erreur de géocodage :", error);
+    suggestions.value = [];
+  }
+};
+
+const zoomToLocation = (coordinates: [number, number]) => {
+  map!.flyTo({
+    center: coordinates,
+    zoom: 16, 
+    speed: 1.2, 
+    curve: 1.4, 
+  });
+  suggestions.value = []; // Masquer les suggestions après sélection
+};
 
 
 // Fonction pour charger les itinéraires et marqueurs du jour actuel
@@ -227,6 +282,31 @@ watch(
       <span>Jour {{ currentDay }}</span>
       <button @click="nextDay" :disabled="currentDay === days.length">Jour suivant</button>
     </div>
+    <div class="search-container">
+  <div class="search-input">
+    <input
+      v-model="searchQuery"
+      type="text"
+      placeholder="Recherchez un lieu"
+      @input="searchLocation"
+    />
+    <button>
+      <i class="fa fa-search"></i>
+    </button>
+  </div>
+  <ul class="suggestions-list" v-if="suggestions.length > 0">
+    <li
+      v-for="(suggestion, index) in suggestions"
+      :key="index"
+      @click="zoomToLocation(suggestion.coordinates)"
+    >
+      {{ suggestion.name }}
+    </li>
+  </ul>
+</div>
+
+
+
 
     <!-- Conteneur de la carte -->
     <div ref="mapContainer" class="map-container">
@@ -313,4 +393,89 @@ watch(
   font-size: 16px;
   font-weight: bold;
 }
+
+/* Conteneur de la recherche */
+.search-container {
+  position: relative;
+  max-width: 400px;
+ /* margin: 20px auto;*/
+  z-index: 1000;
+}
+
+/* Barre de recherche */
+.search-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.search-input input {
+  flex: 1;
+  padding: 10px 15px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #333;
+}
+
+.search-input button {
+  background-color: #71108a;
+  border: none;
+  padding: 10px 15px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 0 30px 30px 0;
+  transition: background-color 0.3s ease;
+}
+
+.search-input button:hover {
+  background-color: #5c0b6b;
+}
+
+.search-input button i {
+  font-size: 18px;
+}
+
+/* Liste des suggestions */
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  z-index: 2000;
+}
+
+.suggestions-list li {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.suggestions-list li:hover {
+  background-color: #f5f5f5;
+  color: #71108a;
+}
+
+.suggestions-list li:last-child {
+  border-bottom: none;
+}
+
+
+
+
 </style>
