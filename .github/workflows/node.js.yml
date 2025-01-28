@@ -25,7 +25,7 @@ jobs:
 
       # Installe les dépendances
       - name: Install dependencies
-        run: npm ci
+        run: npm -legacy-peer-deps ci
 
       # Exécute le script "test:ci"
       - name: Run test:ci

@@ -36,7 +36,9 @@ const selectVoyage = (voyageId: string) => {
         <ul class="nav flex-column">
           <li class="nav-item">
               <button class="nav-link accordion-button" @click="toggleAccordion">
-              <font-awesome-icon icon="map-marked-alt" /> Planifier un voyage
+                <router-link to="/" class="" active-class="active" style="text-decoration: none;">
+                  <font-awesome-icon icon="map-marked-alt" /> Planifier un voyage
+                </router-link>
               <span v-if="isAccordionOpen">▲</span>
               <span v-else>▼</span>
             </button>
